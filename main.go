@@ -54,6 +54,7 @@ func calculatePoints(r Receipt) int {
 	pointTotal += calculateRoundTotal(r.Total)
 	pointTotal += calculateMultipleTotal(r.Total)
 	pointTotal += calculateItemCount(r.Items)
+	pointTotal += calculateDescLength(r.Items)
 	pointTotal += calculatePurchaseDay(r.PurchaseDate)
 	pointTotal += calculatePurchaseTime(r.PurchaseTime)
 
@@ -61,14 +62,14 @@ func calculatePoints(r Receipt) int {
 }
 
 func calculateAlphanumeric(s string) int {
-	var isAlpha = regexp.MustCompile(`^[a-zA-Z0-9_]*$`).MatchString
+	var isAlpha = regexp.MustCompile(`^[a-zA-Z0-9]*$`).MatchString
 	if isAlpha(s) == true {
 		return len(s)
 	} else {
 		var result strings.Builder
 		for i := 0; i < len(s); i++ {
 			b := s[i]
-			if ('a' <= b && b <= 'z') || ('A' <= b && b <= 'Z') || ('0' <= b && b <= '9') || (b == ' ') {
+			if ('a' <= b && b <= 'z') || ('A' <= b && b <= 'Z') || ('0' <= b && b <= '9') {
 				result.WriteByte(b)
 			}
 		}
@@ -111,7 +112,7 @@ func calculateDescLength(l []ItemsList) int {
 	total := 0
 	for i := 0; i < len(l); i++ {
 		b := l[i]
-		if len(b.ShortDescription)%3 == 0 {
+		if len(strings.TrimSpace(b.ShortDescription))%3 == 0 {
 			val, err := strconv.ParseFloat(b.Price, 32)
 			if err == nil {
 				total += int(math.Ceil(val * 0.2))
@@ -122,7 +123,10 @@ func calculateDescLength(l []ItemsList) int {
 }
 
 func calculatePurchaseDay(s string) int {
-	val := int(s[9])
+	val, err := strconv.Atoi(string(s[9]))
+	if err != nil {
+		return 0
+	}
 	if val%2 != 0 {
 		return 6
 	}
@@ -139,9 +143,9 @@ func calculatePurchaseTime(s string) int {
 	if (val < 14) || (val >= 16) {
 		return 0
 	} else if val == 14 && val2 != 0 {
-		return 6
+		return 10
 	} else {
-		return 6
+		return 10
 	}
 }
 
