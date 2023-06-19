@@ -1,4 +1,139 @@
-# Receipt Processor
+# Receipt Processor - Implementation Description
+
+## System Requirements
+This program assumes that the target system already has the Go programming language installed. Additionally, this program is best
+run in a UNIX terminal.
+
+## Running the Program
+Open a UNIX terminal and navigate to the local directory you have saved this project to. From the root of the directory, run the following command:
+```bash
+go run .
+```
+Upon success, the terminal should display a series of debug messages ending with the following line:
+```bash
+[GIN-debug] Listening and serving HTTP on localhost:8080
+```
+Now that the program is running and ready to handle requests, open a separate UNIX terminal and once again navigate to the project directory.
+In your second terminal, paste the following POST request:
+```bash
+ curl http://localhost:8080/receipts/process \
+--include \
+--header "Content-Type: application/json" \
+--request "POST" \
+--data '{"retailer": "Target",
+  "purchaseDate": "2022-01-01",
+  "purchaseTime": "13:01",
+  "items": [
+    {
+      "shortDescription": "Mountain Dew 12PK",
+      "price": "6.49"
+    },{
+      "shortDescription": "Emils Cheese Pizza",
+      "price": "12.25"
+    },{
+      "shortDescription": "Knorr Creamy Chicken",
+      "price": "1.26"
+    },{
+      "shortDescription": "Doritos Nacho Cheese",
+      "price": "3.35"
+    },{
+      "shortDescription": "   Klarbrunn 12-PK 12 FL OZ  ",
+      "price": "12.00"
+    }
+  ],
+  "total": "35.35"
+}'
+```
+This submits a POST request for the provided json receipt to the receipts/process path and returns a UUID. The id will be shown in the following format:
+```json
+{"id": {id}}
+```
+In order to receive the point total for the receipt, the generated id must be passed to the path receipts/{id}/points. To do so, copy and paste the request below into the UNIX terminal being sure to replace {id} in the path with the id generated from the POST request:
+```bash
+ curl http://localhost:8080/receipts/{id}/points
+ ```
+This will make an implicit GET request and return the point total for the receipt associated with the provided id in the format:
+```json
+{"points": {points}}
+```
+For this example receipt, the point total should be 28.
+
+## Testing the Program
+To test the program, first be sure that the program is not already running. If the program is still running in a terminal, the process can be killed using CTRL-C. Then, in a UNIX terminal set at the root directory of the project, run the following command:
+```bash
+go test
+```
+The output should look as follows if all tests pass:
+```bash
+PASS
+ok      example/ReceiptChallenge        0.730s
+```
+If a test does not pass, the terminal will display an error stating the expected value and the actual value that caused an error.
+The testing file tests the .json receipts included in this project's /examples directory (morning-receipt.json and simple-receipt.json).
+The object morning-receipt.json is expected to return 15 points, and simple-receipt.json is expected to return 31 points
+
+## Additional Example Requests
+Below is a series of POST requests that can be copied and pasted into the UNIX terminal for program testing.
+```bash
+ curl http://localhost:8080/receipts/process \
+--include \
+--header "Content-Type: application/json" \
+--request "POST" \
+--data '{
+  "retailer": "M&M Corner Market",
+  "purchaseDate": "2022-03-20",
+  "purchaseTime": "14:33",
+  "items": [
+    {
+      "shortDescription": "Gatorade",
+      "price": "2.25"
+    },{
+      "shortDescription": "Gatorade",
+      "price": "2.25"
+    },{
+      "shortDescription": "Gatorade",
+      "price": "2.25"
+    },{
+      "shortDescription": "Gatorade",
+      "price": "2.25"
+    }
+  ],
+  "total": "9.00"
+}'
+```
+
+```bash
+ curl http://localhost:8080/receipts/process \
+--include \
+--header "Content-Type: application/json" \
+--request "POST" \
+--data '{
+  "retailer": "M&M Corner Market",
+  "purchaseDate": "2022-03-20",
+  "purchaseTime": "14:33",
+  "items": [
+    {
+      "shortDescription": "Gatorade",
+      "price": "2.25"
+    },{
+      "shortDescription": "Gatorade",
+      "price": "2.25"
+    },{
+      "shortDescription": "Gatorade",
+      "price": "2.25"
+    },{
+      "shortDescription": "Gatorade",
+      "price": "2.25"
+    }
+  ],
+  "total": "9.00"
+}'
+```
+
+
+
+
+# Receipt Processor - Challenge Description
 
 Build a webservice that fulfils the documented API. The API is described below. A formal definition is provided 
 in the [api.yml](./api.yml) file, but the information in this README is sufficient for completion of this challenge. We will use the 
