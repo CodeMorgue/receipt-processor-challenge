@@ -11,13 +11,16 @@ import (
 	"github.com/google/uuid"
 )
 
+// Define a map of receipts that stores a UUID as a key, and a receipt object as the value
 var receiptMap map[string]Receipt
 
+// Define an items struct to be used in the Receipt struct
 type ItemsList struct {
 	ShortDescription string `json:"shortDescription"`
 	Price            string `json:"price"`
 }
 
+// Define a Receipt struct to bind the given json object to
 type Receipt struct {
 	Retailer     string      `json:"retailer"`
 	PurchaseDate string      `json:"purchaseDate"`
@@ -26,6 +29,7 @@ type Receipt struct {
 	Items        []ItemsList `json:"items"`
 }
 
+// When a json object is posted, bind its values to a new Receipt and generate a UUID. Add the UUID to the receiptMap as a key and the Receipt as a value
 func createId(c *gin.Context) {
 	var newReceipt Receipt
 	if err := c.BindJSON(&newReceipt); err != nil {
@@ -33,9 +37,11 @@ func createId(c *gin.Context) {
 	}
 	id_string := (uuid.New()).String()
 	receiptMap[id_string] = newReceipt
-	c.IndentedJSON(http.StatusCreated, id_string)
+	c.IndentedJSON(http.StatusCreated, gin.H{"id": id_string})
 }
 
+// When a GET request is made with the appropriate path with an id, find the associated Receipt and calculate its point total
+// If receipt does not exist, return http.StatusNotFound code
 func processReceipt(c *gin.Context) {
 	id := c.Param("id")
 	for key, value := range receiptMap {
@@ -47,6 +53,7 @@ func processReceipt(c *gin.Context) {
 	c.IndentedJSON(http.StatusNotFound, gin.H{"message": "receipt not found"})
 }
 
+// Takes a Receipt as an argument and calculates its point total using function calls
 func calculatePoints(r Receipt) int {
 	pointTotal := 0
 
@@ -61,6 +68,7 @@ func calculatePoints(r Receipt) int {
 	return pointTotal
 }
 
+// Calculates the number of alphanumeric values in the retailer name of a Receipt
 func calculateAlphanumeric(s string) int {
 	var isAlpha = regexp.MustCompile(`^[a-zA-Z0-9]*$`).MatchString
 	if isAlpha(s) == true {
@@ -77,6 +85,7 @@ func calculateAlphanumeric(s string) int {
 	}
 }
 
+// Caclulates if the Receipt total is a rounded value with no decimals and returns the appropriate point value
 func calculateRoundTotal(s string) int {
 	val, err := strconv.ParseFloat(s, 32)
 	if err == nil {
@@ -90,6 +99,7 @@ func calculateRoundTotal(s string) int {
 	}
 }
 
+// Calculates if the total is a multiple of 0.25 and returns the appropriate point value
 func calculateMultipleTotal(s string) int {
 	val, err := strconv.ParseFloat(s, 32)
 	if err == nil {
@@ -103,6 +113,7 @@ func calculateMultipleTotal(s string) int {
 	}
 }
 
+// Calculates the number of pairs of items on a Receipt and returns the appropriate point value
 func calculateItemCount(l []ItemsList) int {
 	length := len(l)
 	return ((length - (length % 2)) / 2) * 5
@@ -122,6 +133,7 @@ func calculateDescLength(l []ItemsList) int {
 	return total
 }
 
+// Calculates if the purchase day on a Receipt is odd and returns the appropriate point value
 func calculatePurchaseDay(s string) int {
 	val, err := strconv.Atoi(string(s[9]))
 	if err != nil {
@@ -133,6 +145,7 @@ func calculatePurchaseDay(s string) int {
 	return 0
 }
 
+// Calculates if the purchase time on a Receipt is after 2:00 pm and before 4:00 pm and returns the appropriate point value
 func calculatePurchaseTime(s string) int {
 	val, err := strconv.Atoi(string(s[0:2]))
 	val2, err2 := strconv.Atoi(string(s[3]))
@@ -149,6 +162,7 @@ func calculatePurchaseTime(s string) int {
 	}
 }
 
+// Initializes the receiptMap, gin router, and http request paths, then runs the program listening on localhost:8080
 func main() {
 	receiptMap = make(map[string]Receipt)
 	router := gin.Default()
