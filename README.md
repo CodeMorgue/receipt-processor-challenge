@@ -52,7 +52,7 @@ In order to receive the point total for the receipt, the generated id must be pa
 ```bash
  curl http://localhost:8080/receipts/{id}/points
  ```
-This will make an implicit GET request and return the point total for the receipt associated with the provided id in the format:
+This will make an implicit GET request and return the point total for the receipt associated with the provided id in the following format:
 ```json
 {"points": {points}}
 ```
