@@ -5,7 +5,7 @@ This program assumes that the target system already has the Go programming langu
 run in a UNIX terminal.
 
 ## Running the Program
-Open a UNIX terminal and navigate to the local directory you have saved this project to. From the root of the directory, run the following command:
+Open a UNIX terminal and navigate to the local directory housing this project. From the root of the directory, run the following command:
 ```bash
 go run .
 ```
@@ -58,6 +58,16 @@ This will make an implicit GET request and return the point total for the receip
 ```
 For this example receipt, the point total should be 28.
 
+Below is the general format for writing a POST request
+---
+```bash
+curl {url] \
+--include \
+--header "Content-Type: application/json" \
+--request "POST" \
+--data '{json data}'
+```
+
 ## Testing the Program
 To test the program, first be sure that the program is not already running. If the program is still running in a terminal, the process can be killed using CTRL-C. Then, in a UNIX terminal set at the root directory of the project, run the following command:
 ```bash
@@ -101,34 +111,38 @@ Below is a series of POST requests that can be copied and pasted into the UNIX t
   "total": "9.00"
 }'
 ```
-
 ```bash
  curl http://localhost:8080/receipts/process \
 --include \
 --header "Content-Type: application/json" \
 --request "POST" \
 --data '{
-  "retailer": "M&M Corner Market",
-  "purchaseDate": "2022-03-20",
-  "purchaseTime": "14:33",
-  "items": [
-    {
-      "shortDescription": "Gatorade",
-      "price": "2.25"
-    },{
-      "shortDescription": "Gatorade",
-      "price": "2.25"
-    },{
-      "shortDescription": "Gatorade",
-      "price": "2.25"
-    },{
-      "shortDescription": "Gatorade",
-      "price": "2.25"
-    }
-  ],
-  "total": "9.00"
+    "retailer": "Walgreens",
+    "purchaseDate": "2022-01-02",
+    "purchaseTime": "08:13",
+    "total": "2.65",
+    "items": [
+        {"shortDescription": "Pepsi - 12-oz", "price": "1.25"},
+        {"shortDescription": "Dasani", "price": "1.40"}
+    ]
 }'
 ```
+```bash
+ curl http://localhost:8080/receipts/process \
+--include \
+--header "Content-Type: application/json" \
+--request "POST" \
+--data '{
+    "retailer": "Target",
+    "purchaseDate": "2022-01-02",
+    "purchaseTime": "13:13",
+    "total": "1.25",
+    "items": [
+        {"shortDescription": "Pepsi - 12-oz", "price": "1.25"}
+    ]
+}'
+```
+
 
 
 
